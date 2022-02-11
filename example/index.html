@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>Grab 'N Pinch</title>
+    <style>
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+
+      #root {
+        position: fixed;
+      }
+
+      body,
+      #root,
+      .image {
+        -webkit-user-drag: none;
+        user-select: none;
+        touch-action: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <img class="image" src="./sample.jpg" />
+      <div style="text-align: right">
+        <a class="link" href="https://www.pexels.com/photo/person-walking-on-sidewalk-near-building-10768574/"
+          >Photo by Ahmed from Pexels</a
+        >
+      </div>
+    </div>
+    <script type="module">
+      import { GrabNPinchManager } from './grab-n-pinch.js';
+
+      window.addEventListener('load', () => {
+        const root = document.getElementById('root');
+        if (!root) throw new Error('Element #root not found');
+
+        const gnp = new GrabNPinchManager({
+          translate: { x: 0, y: 0 },
+          scale: window.innerWidth / root.clientWidth,
+          minScale: Math.min(0.5, window.innerWidth / root.clientWidth, window.innerHeight / root.clientHeight),
+        });
+
+        document.body.addEventListener('wheel', gnp.updateScaleInertia);
+        document.body.addEventListener('pointerdown', gnp.addPointer);
+        document.body.addEventListener('pointermove', gnp.updatePointer);
+        document.body.addEventListener('pointerleave', gnp.removePointer);
+        document.body.addEventListener('pointerup', gnp.removePointer);
+
+        document.body.addEventListener('keydown', (e) => {
+          if (e.key === '0' && e.ctrlKey) {
+            if (e.altKey) {
+              gnp.scale = Math.min(
+                window.innerWidth / (20 + root.clientWidth),
+                window.innerHeight / (20 + root.clientHeight),
+              );
+              Object.assign(gnp.translate, {
+                x: (window.innerWidth - root.clientWidth) / 2 / gnp.scale,
+                y: 10 * gnp.scale,
+              });
+            } else {
+              Object.assign(gnp, { scale: window.innerWidth / root.clientWidth, translate: { x: 0, y: 0 } });
+            }
+          }
+        });
+
+        let elapsed = 0;
+        (function raf() {
+          requestAnimationFrame((time) => {
+            const delta = time - elapsed;
+            elapsed = time;
+            gnp.run(delta);
+            const margin = {
+              x: window.innerWidth - root.clientWidth * gnp.scale,
+              y: window.innerHeight - root.clientHeight * gnp.scale,
+            };
+            gnp.translate = {
+              x: Math.min(
+                Math.max(Math.min(margin.x, 0) - window.innerHeight / 2, gnp.translate.x),
+                Math.max(margin.x, 0) + window.innerHeight / 2,
+              ),
+              y: Math.min(
+                Math.max(Math.min(margin.y, 0) - window.innerHeight / 2, gnp.translate.y),
+                Math.max(margin.y, 0) + window.innerHeight / 2,
+              ),
+            };
+            root.style.transformOrigin = '0 0';
+            const transform = `matrix3d(${gnp.scale}, 0, 0, 0, 0, ${gnp.scale}, 0, 0, 0, 0, 1, 0, ${gnp.translate.x},${gnp.translate.y}, 0, 1)`;
+            root.style.transform = transform;
+            raf();
+          });
+        })();
+      });
+    </script>
+  </body>
+</html>

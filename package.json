@@ -1,0 +1,18 @@
+{
+  "name": "@olmot/grab-n-pinch",
+  "version": "1.0.0",
+  "author": "Seungmin Kim",
+  "repository": "http://github.com/olimot/grab-n-pinch",
+  "description": "Grab n' pinch library for both desktop and mobile device.",
+  "main": "lib/grab-n-pinch.js",
+  "types": "src/grab-n-pinch.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "esbuild src/grab-n-pinch.ts --bundle --minify --format=cjs --sourcemap --outdir=lib",
+    "build:example": "esbuild src/grab-n-pinch.ts --bundle --minify --format=esm --sourcemap --outdir=example"
+  },
+  "devDependencies": {
+    "esbuild": "^0.14.11",
+    "typescript": "^4.5.4"
+  }
+}
