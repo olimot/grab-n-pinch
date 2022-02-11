@@ -2,6 +2,10 @@
 
 A libarary supporting panning and zooming for both desktop and mobile devices.
 
+## Example
+
+https://olimot.github.io/grab-n-pinch/example
+
 ## Usage
 
 ```js
